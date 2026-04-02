@@ -44,9 +44,9 @@ Identity Score   = Identity SSIM (60%)
 ### Inputs Required
 | Input | Description |
 |-------|-------------|
-| Person Image | Original person photo (input to IDM-VTON) |
+| Model Image | Original person photo (input to IDM-VTON) |
 | Garment Image | Target garment photo (input to IDM-VTON) |
-| Output Image | Generated try-on result (IDM-VTON output) |
+| Generated Image | Generated try-on result (IDM-VTON output) |
 
 ---
 
