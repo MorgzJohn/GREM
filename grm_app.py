@@ -609,20 +609,31 @@ with tab1:
                     unsafe_allow_html=True)
 
             st.markdown(section_divider("Research Finding"), unsafe_allow_html=True)
-            if R['grem_gap'] > 0.05:
+            if R['grem_gap'] <= 0.05:
+                st.markdown(f"""<div class="finding-panel good">
+                    <div class="finding-eyebrow">✓ Metrics Aligned</div>
+                    <p class="finding-text">GREM gap is only <strong>{R['grem_gap']*100:.1f}%</strong> —
+                    SSIM and GREM are in close agreement for this result. The garment transfer
+                    quality is consistent with what whole-image SSIM suggests.</p>
+                </div>""", unsafe_allow_html=True)
+            elif R['ssim_whole'] > R['overall_grem']:
                 st.markdown(f"""<div class="finding-panel">
                     <div class="finding-eyebrow">⚠ SSIM Overestimation Detected</div>
                     <p class="finding-text">Standard SSIM reports <strong>{R['ssim_whole']}</strong> but GREM scores
                     this try-on at <strong>{R['overall_grem']}</strong> — a gap of
-                    <strong>{R['grem_gap']*100:.1f}%</strong>. SSIM inflates its score by including
-                    the unchanged face, background and legs. GREM isolates the garment region
-                    and reveals the true try-on quality.</p>
+                    <strong>{R['grem_gap']*100:.1f}%</strong>. SSIM is inflated by the unchanged
+                    face, background, and legs. GREM isolates the garment region and reveals
+                    the true try-on quality is lower than SSIM suggests.</p>
                 </div>""", unsafe_allow_html=True)
             else:
                 st.markdown(f"""<div class="finding-panel good">
-                    <div class="finding-eyebrow">✓ Metrics Aligned</div>
-                    <p class="finding-text">GREM gap is only <strong>{R['grem_gap']*100:.1f}%</strong> —
-                    SSIM and GREM are in close agreement for this result.</p>
+                    <div class="finding-eyebrow">✦ SSIM Underestimation Detected</div>
+                    <p class="finding-text">Standard SSIM reports <strong>{R['ssim_whole']}</strong> but GREM scores
+                    this try-on at <strong>{R['overall_grem']}</strong> — a gap of
+                    <strong>{R['grem_gap']*100:.1f}%</strong>. SSIM penalises this result because
+                    the garment change is large, dragging down the whole-image similarity score.
+                    GREM recognises that the garment transferred correctly — colour and texture
+                    both match the target — and scores it higher accordingly.</p>
                 </div>""", unsafe_allow_html=True)
 
             st.markdown(section_divider("Visual Analysis"), unsafe_allow_html=True)
