@@ -504,7 +504,7 @@ def section_divider(title):
 # ─────────────────────────────────────────────
 st.markdown("""
 <div class="hero-wrap">
-    <p class="hero-eyebrow">Virtual Try-On Research · MCA 2024–25</p>
+    <p class="hero-eyebrow">Virtual Try-On</p>
     <h1 class="hero-title"><span class="accent">G</span><span class="light">REM</span></h1>
     <div class="hero-divider"></div>
     <p class="hero-subtitle">Garment Region Evaluation Metric</p>
@@ -818,21 +818,7 @@ with tab3:
     a plain tee should produce a similarly smooth surface. This is viewpoint-invariant:
     only the texture richness level is compared, not the spatial arrangement of folds.
 
-    <h3>Formula &amp; Weight Rationale</h3>
-    <code>Overall GREM = Garment Fidelity × 0.8 + Identity Contribution × 0.2</code>
-    <br><br>
-    <code>Garment Fidelity = Color × 0.55 + Texture × 0.45</code>
-    <br><br>
-    SSIM is <strong>not a component of GREM</strong>. It is computed separately as a baseline
-    for comparison. The GREM score is derived entirely from perceptual colour distance (ΔE)
-    and texture complexity matching — both of which are viewpoint-invariant and garment-specific.
-    <br><br>
-    Color carries slightly more weight (0.55) because a wrong colour is the most immediately
-    obvious failure in a try-on. Texture (0.45) captures fabric richness transfer — velvet
-    should look like velvet, plain cotton should look smooth.
-    <br><br>
-    <code>Identity Contribution = min(Identity Color × 0.2, 0.10)  if GF &lt; 0.55
-                           = Identity Color × 0.2              otherwise</code>
+  
 
     <h3>Research Application</h3>
     GREM was developed to evaluate <strong>IDM-VTON</strong> — a diffusion-based
@@ -858,5 +844,4 @@ with tab3:
     </table>
     """, unsafe_allow_html=True)
 
-    st.markdown(section_divider("Citation"), unsafe_allow_html=True)
     
