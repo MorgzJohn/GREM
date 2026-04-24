@@ -859,9 +859,4 @@ with tab3:
     """, unsafe_allow_html=True)
 
     st.markdown(section_divider("Citation"), unsafe_allow_html=True)
-    st.code("""@misc{grem2025,
-  title  = {GREM: Garment Region Evaluation Metric for Virtual Try-On Systems},
-  author = {Morgan John},
-  year   = {2025},
-  note   = {MCA Final Year Research Project, CHRIST University}
-}""", language="bibtex")
+    
