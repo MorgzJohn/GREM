@@ -1,0 +1,126 @@
+{
+  "_purpose": "Pre-registered analysis plan. Written BEFORE any degraded image is scored. The batch runner stores this file's SHA-256 with every result; any later edit is therefore visible.",
+  "version": 2,
+  "implementation": "GREM_revision_v2/code/grem_core.py (unchanged GREM; standard 2-D whole-image SSIM; masked 2-D regional SSIM)",
+  "unit_of_analysis": "sample = one (person, garment, baseline output); degraded versions are repeated measures of that sample, never independent samples",
+  "analysis_sets": {
+    "primary": "analysis_set == 'primary_candidate' AND mask_quality in {good, partial}",
+    "sensitivity": "primary restricted to mask_quality == 'good'; and primary restricted to baseline_quality == 'good'",
+    "mask_stress_subset": "non-studio samples: reported separately and descriptively, split by mask_quality; never pooled with primary",
+    "expected_failure": "reported as failures (empty or degenerate mask), never scored as results"
+  },
+  "experiments": {
+    "B_hue": {
+      "requested_degrees": [
+        0,
+        15,
+        30,
+        45,
+        60,
+        90
+      ],
+      "implementation": "degrade.shift_hue semantics: OpenCV hue units are 2 degrees, shift = round(degrees/2), so effective degrees are [0, 16, 30, 44, 60, 90]; effective degrees are recorded per row; level 0 is the untouched baseline",
+      "applied_to": "garment mask pixels only",
+      "informative_rule": "a sample is 'hue-informative' if mean HSV saturation of the baseline output inside the mask is >= 40 (of 255); others are reported separately because hue rotation does not change near-grey pixels"
+    },
+    "C_blur": {
+      "kernel_sizes": [
+        1,
+        3,
+        5,
+        9,
+        15,
+        25
+      ],
+      "implementation": "cv2.GaussianBlur(img, (k,k), 0) (sigma derived by OpenCV), whole image blurred then pasted back inside the mask only; kernel 1 is the untouched baseline"
+    },
+    "A_noise": {
+      "sigma_gray_levels": [
+        0,
+        5,
+        10,
+        20,
+        40
+      ],
+      "implementation": "additive zero-mean Gaussian noise on all three channels inside the mask only, clipped to [0,255]; seed derived from sha256(sample_id + level) so every run is identical; level 0 is the untouched baseline",
+      "status": "proposed general-degradation experiment; the author may veto before step 2"
+    },
+    "D_wrong_garment": {
+      "alphas": [
+        0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "implementation": "inside the mask, blend baseline output with the SAME PERSON'S output wearing a different garment (spatially aligned by construction); outputs of different persons are never used",
+      "partner_rule": "fixed before scoring: outputs of the same person are sorted by file name and each output's partner is the next one cyclically (column wrong_garment_partner); samples with no partner are excluded from D",
+      "reference_for_scoring": "the ORIGINAL garment of the sample (not the partner's)"
+    },
+    "D2_mismatched_reference": {
+      "implementation": "score each primary-set baseline output against the garment image of every OTHER primary-set sample (GREM only). SSIM is not applicable because it never uses the garment image and is constant by construction"
+    }
+  },
+  "metrics_recorded": [
+    "CP",
+    "TF",
+    "GF_raw",
+    "penalty",
+    "GF",
+    "NP",
+    "GREM",
+    "SSIM_whole",
+    "SSIM_garment_region",
+    "SSIM_nongarment_region",
+    "mask_pixels"
+  ],
+  "validity_rules": {
+    "empty_mask": "mask_pixels < 50 (the threshold used inside grem_core.py) -> failure, not scored as a result",
+    "cp_default": "reference garment has < 50 non-white pixels (all channels > 220 counts as white) -> CP silently defaults to 0.5 in grem_core.py; flagged as failure",
+    "nan_ssim": "regional SSIM = NaN when fewer than 50 valid pixels remain; reported as missing",
+    "tiny_mask_fraction": 0.01,
+    "tiny_mask": "mask_pixels / image_pixels < 0.01 -> expected failure (observed: 0.3% for the white garment, >= 4.3% for every other garment)"
+  },
+  "statistics": {
+    "per_level": "mean, SD, median, IQR across samples (n reported)",
+    "paired_change": "metric(level) - metric(own baseline) per sample; mean change with 95% bootstrap CI",
+    "direction": "percentage of samples with strict decrease and with non-increase (GREM, CP, TF, SSIM); reported, not a significance test",
+    "tests": "exploratory two-sided Wilcoxon signed-rank vs baseline at each level, Holm-corrected within each experiment",
+    "correlation": "per-sample Spearman rho between degradation intensity and each metric; report median rho and a 95% bootstrap CI",
+    "bootstrap": {
+      "resamples": 10000,
+      "seed": 20260101,
+      "resample_unit": "sample (exchangeability assumed and stated as a limitation: samples share 4 persons and 7 garments)"
+    },
+    "ssim_comparison": "descriptive only: effect sizes are shown side by side; no claim that GREM is better than SSIM, and no claim about human perception",
+    "small_sample_note": "primary set: 12 samples, 4 persons, 7 garments. Results describe how GREM changes within each outfit; they say little about variation across people. All inference is exploratory.",
+    "sensitivity": [
+      "leave-one-person-out",
+      "leave-one-garment-out",
+      "exclude garments with non-3:4 product photos (IMG_7461.jpg)",
+      "mask_quality == 'good' only",
+      "baseline_quality == 'good' only"
+    ]
+  },
+  "not_allowed": [
+    "changing grem_core.py",
+    "removing samples after seeing results",
+    "choosing the baseline or partner by score",
+    "treating degradation levels as independent samples"
+  ],
+  "supersedes": {
+    "version": 1,
+    "sha256": "ce124d79f08e6835da8cf6c92625c46b821272c01c3a51b833c6824c60e74b6b",
+    "reason": "revised BEFORE any degraded image was scored, after the mask overlays showed only 4 studio persons (2 in the good-mask subset)"
+  },
+  "changes_from_v1": [
+    "cluster bootstrap by person replaced: with 4 persons (2 in the good-mask subset) resampling people is not meaningful",
+    "added TINY_MASK validity rule (mask < 1% of the image) -> expected failure",
+    "added sensitivity analyses: leave-one-person-out, leave-one-garment-out, and excluding garments whose product photo is not 3:4",
+    "the non-studio (mask-stress) samples are reported descriptively by mask_quality, never pooled with the primary set"
+  ],
+  "known_structural_facts": [
+    "the garment mask is computed from the reference garment image only, so every sample that shares a garment has an identical mask",
+    "garment photos that are not 3:4 are stretched to 768x1024 by the loader"
+  ]
+}

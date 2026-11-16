@@ -133,7 +133,7 @@ def load_pil_image(pil_img, size=(768, 1024)):
 #   Step 1 – Remove the white/near-white background from the garment image
 #             using a saturation + brightness threshold in HSV space.
 #   Step 2 – Project the resulting foreground silhouette onto the person/output
-#             image using the torso region as an anchor (center 40-70% height,
+#             image using the torso region as an anchor (window y 22-72% of height,
 #             20-80% width).  This keeps the mask body-centred while still
 #             being shaped by the actual garment silhouette.
 #   Step 3 – Morphological cleanup (close small holes, remove noise) and a
@@ -166,7 +166,8 @@ def get_garment_mask(person_img, garment_img):
     # Bounding box of garment foreground (relative proportions)
     ys, xs = np.where(foreground > 0)
     if len(ys) < 100:
-        # Nearly all-white garment – fall back to a sensible torso box
+        # Nearly all-white garment - default box ratios. NOTE: 'foreground' stays (almost) empty,
+        # so the projected mask is (almost) empty and downstream scores default to 0.0 / 0.5.
         top_r, bot_r, left_r, right_r = 0.22, 0.70, 0.25, 0.75
     else:
         gh, gw = garment_img.shape[:2]
@@ -233,22 +234,47 @@ def get_garment_mask(person_img, garment_img):
 # A good try-on will have moderate-to-high person→output SSIM in the garment
 # region because the underlying body shape is preserved, just with new fabric.
 
-def calculate_ssim_region(img1, img2, mask):
-    """General SSIM between two images within a mask region."""
+# -- SSIM baselines (NOT part of the GREM score) -------------------------------
+#
+# Whole-image SSIM: standard 2-D SSIM (scikit-image structural_similarity, grayscale,
+# default 7x7 uniform window, data_range=255, border cropped by the library) between the
+# ORIGINAL PERSON image and the generated OUTPUT.
+#
+# Regional SSIM: the SSIM *map* is computed on the full 2-D images, and the score is the
+# mean of the map over pixels whose whole window lies inside the region. The region mask is
+# eroded by the window size, so windows that straddle the region boundary (and therefore mix
+# in pixels from outside the region) are excluded. Pixels in the library's border crop are
+# excluded as well. With an all-ones mask this equals the whole-image SSIM exactly.
+# Returns NaN if fewer than MIN_SSIM_PIXELS valid pixels remain.
+
+SSIM_WIN = 7
+MIN_SSIM_PIXELS = 50
+
+def _gray_pair(img1, img2):
     if img1.shape != img2.shape:
         img2 = cv2.resize(img2, (img1.shape[1], img1.shape[0]))
+    return (cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY),
+            cv2.cvtColor(img2, cv2.COLOR_RGB2GRAY))
 
-    gray1 = cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY)
-    gray2 = cv2.cvtColor(img2, cv2.COLOR_RGB2GRAY)
 
-    region1 = gray1[mask == 1]
-    region2 = gray2[mask == 1]
+def calculate_ssim_whole(img1, img2):
+    """Standard 2-D whole-image SSIM (grayscale)."""
+    g1, g2 = _gray_pair(img1, img2)
+    return round(float(ssim(g1, g2, data_range=255, win_size=SSIM_WIN)), 4)
 
-    if len(region1) < 50:
-        return 0.0
 
-    score = ssim(region1, region2, data_range=255)
-    return round(float(score), 4)
+def calculate_ssim_region(img1, img2, mask):
+    """Masked 2-D SSIM: mean of the SSIM map over pixels whose window lies fully in `mask`."""
+    g1, g2 = _gray_pair(img1, img2)
+    _, smap = ssim(g1, g2, data_range=255, win_size=SSIM_WIN, full=True)
+    valid = cv2.erode((mask == 1).astype(np.uint8),
+                      np.ones((SSIM_WIN, SSIM_WIN), np.uint8),
+                      borderType=cv2.BORDER_CONSTANT, borderValue=1)
+    pad = (SSIM_WIN - 1) // 2
+    valid[:pad, :] = 0; valid[-pad:, :] = 0; valid[:, :pad] = 0; valid[:, -pad:] = 0
+    if int(valid.sum()) < MIN_SSIM_PIXELS:
+        return float("nan")
+    return round(float(smap[valid == 1].mean()), 4)
 
 
 def calculate_garment_color_preservation(garment_img, output_img, mask):
@@ -332,13 +358,13 @@ def calculate_identity_color_preservation(person_img, output_img, mask):
 # as a similarly textured surface in the output; a plain tee should transfer
 # as a similarly smooth surface.
 #
-# Method: compare the *distribution* of gradient magnitudes (via their mean
-# and std) rather than the pixel-wise map. This is viewpoint-invariant:
+# Method: compare the MEAN gradient magnitude of each region (only the mean is used;
+# the std is NOT used) rather than the pixel-wise map. This is viewpoint-invariant:
 # a high-texture garment worn naturally will have a similarly rich gradient
 # distribution in the output.
 #
 # Scoring: penalise only large differences in complexity level, using a
-# loose decay (exp(-x/1.5)) so moderate complexity mismatches don't crater
+# decay exp(-d/0.3), d=|r-1|/(r+1), so moderate complexity mismatches don't crater
 # the score.
 
 def calculate_texture_score(garment_img, output_img, mask):
@@ -369,7 +395,7 @@ def calculate_texture_score(garment_img, output_img, mask):
         return 0.0
 
     # Compare texture COMPLEXITY (mean gradient magnitude), not pixel maps.
-    # Normalise both by their own mean so scale differences don't matter —
+    # Use the ratio of the two means so the absolute gradient scale cancels --
     # only the relative complexity level is compared.
     mean_g = np.mean(mag_g) + 1e-6
     mean_o = np.mean(mag_o) + 1e-6
@@ -377,14 +403,16 @@ def calculate_texture_score(garment_img, output_img, mask):
     # Ratio of complexities — 1.0 = identical complexity, 0.5 or 2.0 = half/double
     ratio = mean_o / mean_g
     # Map to [0,1]: ratio=1 → diff=0 → score=1.0
-    #               ratio=0.5 or 2.0 → diff=0.5 → score=0.72
-    #               ratio=0.25 or 4.0 → diff=0.75 → score=0.47
-    complexity_diff = abs(ratio - 1.0) / (ratio + 1.0)   # in [0, 0.5]
+    #               ratio=0.5 or 2.0 -> diff=0.333 -> score=0.33
+    #               ratio=0.25 or 4.0 -> diff=0.60 -> score=0.14
+    complexity_diff = abs(ratio - 1.0) / (ratio + 1.0)   # in [0, 1)
     score = float(np.exp(-complexity_diff / 0.3))
 
     return round(max(0.0, min(1.0, score)), 4)
 
 
+# NOTE: the 0.40/0.35/0.25 SSIM-based weights discussed in this block are SUPERSEDED.
+# The code actually uses Color 0.55 / Texture 0.45 with no SSIM term (W_COLOR, W_TEXTURE below).
 # ── FIX 3: Weight justification via soft ablation ───────────────────────────
 #
 # OLD weights: SSIM×0.5 + Color×0.2 + Texture×0.3  — picked arbitrarily.
@@ -439,7 +467,7 @@ def evaluate_grem(person_np, garment_np, output_np):
     one = np.ones(person_np.shape[:2], dtype=np.uint8)
 
     # ── SSIM metrics (baseline comparison only, NOT used in GREM score) ──
-    ss  = calculate_ssim_region(person_np, output_np, one)
+    ss  = calculate_ssim_whole(person_np, output_np)
     gs  = calculate_ssim_region(person_np, output_np, gm)
     is_ = calculate_ssim_region(person_np, output_np, bgm)
 

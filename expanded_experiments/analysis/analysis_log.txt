@@ -1,0 +1,6 @@
+plan sha256 8295cdc33e081d5b4788e76d7cd0d410c13d6dc81e05c3698500b9024872a5f3
+primary n=12: ['S06', 'S07', 'S08', 'S09', 'S10', 'S11', 'S12', 'S13', 'S14', 'S15', 'S16', 'S17']
+hue-informative n=10; not informative: ['S14', 'S17']
+stress n=8; expected failures: ['S03', 'S19']
+bootstrap: 10000 resamples, seed 20260101, resampling samples
+mismatched reference: matched > mismatched in 98.6% of 72 (matched, mismatched) pairs (ties count 0.5)

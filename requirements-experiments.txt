@@ -1,0 +1,9 @@
+# For running code/ and expanded_experiments/ on your own machine (adds analysis and plotting)
+numpy
+pandas
+pillow
+opencv-python
+scikit-image
+scikit-learn
+scipy
+matplotlib

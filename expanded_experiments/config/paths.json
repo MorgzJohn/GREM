@@ -1,0 +1,8 @@
+{
+  "base_dir": "/home/morgz/Documents/GREM/SAMPLE IMAGES",
+  "folders": {
+    "person": "Model",
+    "garment": "garment",
+    "output": "generated Img"
+  }
+}

@@ -1,0 +1,6 @@
+# Versions used for the reported results (recorded in expanded_experiments/results/run_meta.json).
+# Python 3.14.8. If scores printed by a different environment differ in the third decimal, install these versions.
+numpy==2.5.4
+opencv-python==5.0.0
+scikit-image==0.26.0
+scikit-learn==1.9.1

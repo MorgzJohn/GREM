@@ -1,7 +1,8 @@
+# Streamlit app (grm_app.py). Streamlit Community Cloud installs this file.
 streamlit
 numpy
+pandas
 pillow
 opencv-python-headless
 scikit-image
 scikit-learn
-pandas

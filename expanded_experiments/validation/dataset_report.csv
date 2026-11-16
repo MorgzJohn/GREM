@@ -1,0 +1,23 @@
+sample_id,output_file,person_file,garment_file,analysis_set,baseline_quality,person_size,garment_size,output_size,mask_pixels,mask_fraction_of_image,mask_bbox_y0,mask_bbox_y1,mask_bbox_x0,mask_bbox_x1,reference_nonwhite_pixels,reference_foreground_pixels,mean_saturation_in_mask_0_255,hue_informative(mean_sat>=40),has_wrong_garment_partner,flags
+S01,SAMVTON.png,SAM.png,SAMOUTFIT.jpg,mask_stress_subset,good,1050x1400,1250x1250,768x1024,97425,0.1239,0.283,0.676,0.268,0.719,394668,393781,29.8,False,True,ASPECT_GARMENT_1250x1250
+S02,TaylorVTON.png,Taylorswift.png,redgarment.jpg,mask_stress_subset,poor,1500x2000,768x1024,768x1024,64067,0.0815,0.285,0.645,0.303,0.693,294142,294316,203.0,True,True,
+S03,VANSVTON.png,VANSGIRL.png,GUCCI.jpg,expected_failure (empty / tiny mask or no usable reference colours),partial,768x1024,640x640,768x1024,2448,0.0031,0.271,0.354,0.453,0.547,21874,19525,7.3,False,True,ASPECT_GARMENT_640x640;TINY_MASK
+S04,WILLSMITHVTON.png,WILLSMITH.png,polotshirt.jpg,mask_stress_subset,good,465x620,768x1024,768x1024,70828,0.0901,0.298,0.636,0.301,0.697,339420,337198,69.2,True,True,
+S05,WILLSMITHVTON2.png,WILLSMITH.png,09176_00.jpg,mask_stress_subset,poor,465x620,768x1024,768x1024,77822,0.099,0.31,0.616,0.297,0.695,373854,372921,112.5,True,True,
+S06,image (1).png,model.png,09176_00.jpg,primary_candidate,partial,768x1024,768x1024,768x1024,77822,0.099,0.31,0.616,0.297,0.695,373854,372921,109.4,True,True,
+S07,image (3).png,model.png,IMG_7461.jpg,primary_candidate,partial,768x1024,450x656,768x1024,91196,0.116,0.316,0.622,0.234,0.751,403826,382820,47.2,True,True,ASPECT_GARMENT_450x656
+S08,image (5).png,download3.png,09263_00.jpg,primary_candidate,good,768x1024,768x1024,768x1024,64609,0.0822,0.342,0.601,0.303,0.689,353420,349335,108.2,True,True,
+S09,image (6).png,download3.png,09290_00.jpg,primary_candidate,good,768x1024,768x1024,768x1024,33710,0.0429,0.392,0.545,0.305,0.691,235925,235625,91.2,True,True,
+S10,image 2.png,download1.png,09263_00.jpg,primary_candidate,good,768x1024,768x1024,768x1024,64609,0.0822,0.342,0.601,0.303,0.689,353420,349335,120.8,True,True,
+S11,image.png,model.png,garment1.jpg,primary_candidate,good,768x1024,768x1024,768x1024,67293,0.0856,0.295,0.637,0.298,0.701,310555,310493,228.1,True,True,
+S12,image3.png,download.png,09176_00.jpg,primary_candidate,partial,768x1024,768x1024,768x1024,77822,0.099,0.31,0.616,0.297,0.695,373854,372921,84.1,True,True,
+S13,image4.png,download.png,garment1.jpg,primary_candidate,good,768x1024,768x1024,768x1024,67293,0.0856,0.295,0.637,0.298,0.701,310555,310493,182.9,True,True,
+S14,image6.png,download3.png,09256_00.jpg,primary_candidate,good,768x1024,768x1024,768x1024,66700,0.0848,0.272,0.667,0.378,0.616,236774,223770,30.1,False,True,
+S15,image7.png,download3.png,09305_00.jpg,primary_candidate,good,768x1024,768x1024,768x1024,69831,0.0888,0.321,0.619,0.299,0.701,349277,348840,157.7,True,True,
+S16,baldgirlvton.png,download1.png,09305_00.jpg,primary_candidate,good,768x1024,768x1024,768x1024,69831,0.0888,0.321,0.619,0.299,0.701,349277,348840,191.9,True,True,
+S17,baldgirlvton3.png,download1.png,09256_00.jpg,primary_candidate,good,768x1024,768x1024,768x1024,66700,0.0848,0.272,0.667,0.378,0.616,236774,223770,7.4,False,True,
+S18,samvton2.png,SAM.png,polotshirt.jpg,mask_stress_subset,good,1050x1400,768x1024,768x1024,70828,0.0901,0.298,0.636,0.301,0.697,339420,337198,97.7,True,True,
+S19,samvton3.png,SAM.png,GUCCI.jpg,expected_failure (empty / tiny mask or no usable reference colours),good,1050x1400,640x640,768x1024,2448,0.0031,0.271,0.354,0.453,0.547,21874,19525,59.1,True,True,ASPECT_GARMENT_640x640;TINY_MASK
+S20,taylorvton2.png,Taylorswift.png,SAMOUTFIT.jpg,mask_stress_subset,good,1500x2000,1250x1250,768x1024,97425,0.1239,0.283,0.676,0.268,0.719,394668,393781,126.5,True,True,ASPECT_GARMENT_1250x1250
+S21,taylorvton3.png,Taylorswift.png,09290_00.jpg,mask_stress_subset,good,1500x2000,768x1024,768x1024,33710,0.0429,0.392,0.545,0.305,0.691,235925,235625,175.6,True,True,
+S22,vansvton2.png,VANSGIRL.png,09290_00.jpg,mask_stress_subset,good,768x1024,768x1024,768x1024,33710,0.0429,0.392,0.545,0.305,0.691,235925,235625,91.7,True,True,
