@@ -1,0 +1,3 @@
+sample_id,output_file,garment_file,reason,CP,TF,GF_raw,penalty,GF,NP,GREM,SSIM_whole,SSIM_garment_region,SSIM_nongarment_region,mask_pixels
+S03,VANSVTON.png,GUCCI.jpg,expected_failure (empty / tiny mask or no usable reference colours),0.7939,0.5428,0.6809,0.0,0.6809,0.8135,0.7074,0.8342,0.147,0.837,2448
+S19,samvton3.png,GUCCI.jpg,expected_failure (empty / tiny mask or no usable reference colours),0.7726,0.5827,0.6871,0.0,0.6871,0.6237,0.6744,0.7183,0.424,0.72,2448

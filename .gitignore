@@ -1,0 +1,29 @@
+# environments and caches
+.venv/
+venv/
+__pycache__/
+*.pyc
+.~lock.*
+*.bak
+*.mine
+
+# images: not redistributable and large. NEVER commit these
+SAMPLE IMAGES/
+expanded_experiments/degraded/*/
+expanded_experiments/contact/
+expanded_experiments/validation/*.jpg
+expanded_experiments/validation/check/
+image_contact_sheet.jpg
+blur_*.png
+hue_*.png
+wrong_garment_alpha_*.png
+
+# local working folders and archives
+GREM_revision_v2/
+files (1)/
+*.zip
+
+# personal / working files that must not be published
+GREM_Project_Report.docx
+sheet_*.jpg
+outfits_prefilled.csv

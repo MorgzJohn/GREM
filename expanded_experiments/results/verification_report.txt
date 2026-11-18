@@ -1,0 +1,17 @@
+[PASS] analysis plan unchanged since the run
+[PASS] grem_core.py unchanged since the run
+[PASS] every degraded file matches its recorded SHA-256  (360 files, 0 mismatches)
+[PASS] pixels OUTSIDE the garment mask are bit-identical to the baseline in every degraded file  (0 violations)
+[PASS] every degraded file differs from the baseline INSIDE the mask  (0 files unchanged)
+[PASS] manifest agrees: zero changed pixels outside the mask
+[PASS] NP is unchanged by every garment-only degradation  (0 violations)
+[PASS] non-garment-region SSIM is unchanged by every garment-only degradation  (0 violations)
+[PASS] mask size is identical across degradation levels of a sample  (0 violations)
+[PASS] baseline-level rows equal the baseline score
+[PASS] hue effective angles follow shift = round(deg/2)  [('15', '16'), ('30', '30'), ('45', '44'), ('60', '60'), ('90', '90')]
+[PASS] noise seeds are recorded and reproducible
+[PASS] GREM reproduces from its components in every row
+[PASS] no scored row has an empty mask
+[PASS] re-scoring saved files reproduces identical numbers  (5/5)
+
+ALL CHECKS PASSED
